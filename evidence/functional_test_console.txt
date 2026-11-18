@@ -1,0 +1,32 @@
+﻿LAB 5C - FUNCTIONAL TEST CONSOLE TRANSCRIPT
+===========================================
+
+Working directory: project root
+Synthetic test credential: TEST-ONLY-VALUE-not-a-real-secret (never printed)
+
+$ $env:APP_PASSWORD = $null; echo "hello" | python secure_app.py
+Error: APP_PASSWORD is not configured
+
+$ $env:APP_PASSWORD="TEST-ONLY-VALUE-not-a-real-secret"; echo "hello world" | python secure_app.py
+Token: o-DUybY6PiR8VyCMriH73Up_GYWFkO6i-bBwbnc0seE
+Enter text: hello world
+
+$ echo "hello & echo INJECTED_MARKER" | python secure_app.py
+Token: UyTrHRZbEaOLgYHZk9z-oJm3ymGEmfXE43bIbjLJHgA
+Enter text: hello & echo INJECTED_MARKER
+
+$ echo "hello & echo INJECTED_MARKER" | python vulnerable.py
+Password: Admin@123
+Token: 964845
+Enter text: hello 
+INJECTED_MARKER
+
+
+Observation: the vulnerable program executed a second echo through the shell;
+the secure program passed the entire string as one literal argument.
+
+$ python -m bandit -r secure_app.py -f json | find test_id
+  B404  LOW  line 13
+  B603  LOW  line 68
+
+Full reproducible transcript: evidence/test_results.txt

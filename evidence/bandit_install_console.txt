@@ -1,0 +1,14 @@
+﻿LAB 5C - BANDIT INSTALLATION AND VERSION (verbatim commands and output)
+=======================================================================
+
+$ python --version
+Python 3.11.9
+
+$ python -m pip install bandit
+Collecting bandit-1.9.4 (installed successfully; see pip output in evidence/bandit_tool_info.txt)
+
+$ python -m bandit --version
+__main__.py 1.9.4
+  python version = 3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]
+
+Bandit 1.9.4 installed with Python 3.11.9. No #nosec suppressions were used.

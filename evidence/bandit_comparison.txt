@@ -1,0 +1,74 @@
+================================================================================
+LAB 5C - BANDIT BEFORE / AFTER COMPARISON
+================================================================================
+
+Toolchain
+  Bandit version : 1.9.4 (installed with python -m pip install bandit)
+  Python         : 3.11.9 (Windows 64-bit)
+  Commands       : python -m bandit -r <target> -f txt -o <file>
+                   python -m bandit -r <target> -f json -o <file>
+  Before target  : vulnerable.py
+  After target   : secure_app.py
+  Version and options are equivalent for both scans.
+
+--------------------------------------------------------------------------------
+FINDINGS BEFORE (evidence/bandit_before.txt / .json)
+--------------------------------------------------------------------------------
+  Total findings : 4
+  High severity  : 1
+  Medium severity: 0
+  Low severity   : 3
+
+  B404:blacklist                              LOW     / HIGH      line 2
+      Consider possible security implications associated with the subprocess module.
+  B105:hardcoded_password_string             LOW     / MEDIUM    line 4
+      Possible hardcoded password: 'Admin@123'
+  B311:blacklist                              LOW     / HIGH      line 7
+      Standard pseudo-random generators are not suitable for security/crypto purposes.
+  B602:subprocess_popen_with_shell_equals_true HIGH   / HIGH      line 12
+      subprocess call with shell=True identified, security issue.
+
+--------------------------------------------------------------------------------
+FINDINGS AFTER (evidence/bandit_after.txt / .json)
+--------------------------------------------------------------------------------
+  Total findings : 2
+  High severity  : 0
+  Medium severity: 0
+  Low severity   : 2
+
+  B404:blacklist                              LOW     / HIGH      line 13
+      Consider possible security implications associated with the subprocess module.
+  B603:subprocess_without_shell_equals_true   LOW     / HIGH      line 68
+      subprocess call - check for execution of untrusted input.
+
+--------------------------------------------------------------------------------
+METRIC COMPARISON
+--------------------------------------------------------------------------------
+  Metric                  | Before | After | Change
+  ------------------------+--------+-------+-----------------
+  Total findings          | 4      | 2     | -2 (reduced by 50%)
+  High severity           | 1      | 0     | -1 (B602 removed)
+  Medium severity         | 0      | 0     | unchanged
+  Low severity            | 3      | 2     | -1 (B105, B311 removed; B404 retained, B603 added)
+  Confidence high         | 3      | 2     | -1
+  Confidence medium       | 1      | 0     | -1
+
+  Test IDs removed : B105 (hardcoded password), B311 (weak random),
+                     B602 (shell=True)
+  Test IDs retained: B404 (subprocess import advisory)
+  Test IDs newly introduced: B603 (generic subprocess advisory)
+
+  Note: B603 is a low-severity generic warning raised because subprocess is
+  used at all. In secure_app.py the executable is fixed (sys.executable), the
+  argument list is fixed apart from one validated text value, shell=False is
+  explicit, timeout is set, and errors are handled generically. B404 and B603
+  are accepted residual advisories, not unfixed instances of the three target
+  insecure practices. No #nosec suppression was used.
+
+--------------------------------------------------------------------------------
+CONCLUSION
+--------------------------------------------------------------------------------
+All three target insecure practices were detected before remediation and are
+absent after remediation. Two low-severity subprocess advisories remain and are
+documented rather than hidden. The clean functional results in
+evidence/test_results.txt corroborate the static findings.

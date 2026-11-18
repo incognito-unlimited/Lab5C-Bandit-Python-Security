@@ -1,0 +1,98 @@
+==============================================================================
+LAB 5C - FUNCTIONAL AND SECURITY TEST RESULTS
+==============================================================================
+Python: 3.11.9
+Project: D:\Projects\Lab5C-Bandit-Python-Security
+Test credential (synthetic only): TEST-ONLY-VALUE-not-a-real-secret
+
+No real credential is used. The injection payload below is a fixed
+synthetic string; it only invokes a harmless echo command.
+
+------------------------------------------------------------------------------
+TEST 1: APP_PASSWORD unset
+  stdout: 'Error: APP_PASSWORD is not configured'
+  stderr: '' (exit 0)
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 2: APP_PASSWORD set to a test-only value
+  stdout: 'Token: AaTRuL4jrV035RdSw4qrKBr2Cd-rqzK1OA064MJozgU\nEnter text: hello'
+  stderr: '' (exit 0)
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 3: Password is never printed or logged
+  Searched for 'TEST-ONLY-VALUE-not-a-real-secret' and 'Password:' in combined output.
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 4: Generate multiple security tokens
+  token 1: zj8ftuCq2Ge5lZlNiIbHzdMqf9EArSYIqkqix6ulwlY
+  token 2: pij5T9R1c4l1jFGN-tBTpaoD9JzfI0WwH_hzDXMeDy8
+  token 3: 9WdgLXAbde4_C2IMk7sXQOf5Oq7bGdvsPODRfb2rr2s
+  token 4: SfmdKyTk-e4xlWhs5m_f2EXOsksCGRfviFspsChiwxQ
+  token 5: uHYmH82z4g0ZU8wjayClBmOyxeUllVTHlJLcm1Fqmpo
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 5: Token generation uses the secrets module
+  'secrets.token_urlsafe' present: True
+  'import random' absent: True
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 6: Ordinary text as subprocess input
+  stdout: 'Token: 7coA0Oel50YoBhKuZ5c9MoGvIJBVxB0ZsXOpCp8NFQM\nEnter text: hello world'
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 7: Input containing shell metacharacters
+  input:  'hello & echo INJECTED_MARKER'
+  stdout: 'Token: 0aFhg9qfWCCGhvXWeH5rkwFXly7r0sWL7yCBssl49N8\nEnter text: hello & echo INJECTED_MARKER'
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+TEST 8: Literal handling vs. the vulnerable shell implementation
+  secure_app.py output     : 'Token: 0aFhg9qfWCCGhvXWeH5rkwFXly7r0sWL7yCBssl49N8\nEnter text: hello & echo INJECTED_MARKER'
+  vulnerable.py output     : 'Password: Admin@123\nToken: 188635\nEnter text: hello \nINJECTED_MARKER'
+  The vulnerable version ran a second echo through the shell;
+  the secure version passed the text as a single argv element.
+  RESULT: PASS
+
+------------------------------------------------------------------------------
+STATIC CHECKS ON secure_app.py
+  PASS  no shell=True
+  PASS  explicit shell=False
+  PASS  subprocess.run with argument list
+  PASS  no hard-coded credential literal
+  PASS  credential from environment
+  PASS  no print of password
+
+------------------------------------------------------------------------------
+TEST 9: Bandit rescanned on corrected source
+  Actual findings: 2 -> ['B404', 'B603']
+  B105 (hardcoded password), B311 (random) and B602 (shell=True) absent.
+  RESULT: PASS
+
+==============================================================================
+SUMMARY
+==============================================================================
+PASS  1. Missing configuration reported cleanly
+PASS  2. Configuration accepted, token produced
+PASS  3. Secret not present in stdout/stderr
+PASS  4. Five distinct high-entropy tokens
+PASS  5. secrets.token_urlsafe used, random absent
+PASS  6. Ordinary text echoed
+PASS  7. Payload echoed as one literal line
+PASS  8. Secure literal, vulnerable executed second command
+PASS  Static: no shell=True
+PASS  Static: explicit shell=False
+PASS  Static: subprocess.run with argument list
+PASS  Static: no hard-coded credential literal
+PASS  Static: credential from environment
+PASS  Static: no print of password
+PASS  9. Target insecure-practice IDs absent
+
+TOTAL: 15/15 checks passed
+RESULT: PASS - secure alternatives verified and Bandit target findings removed.
+Residual Bandit findings B404 and B603 are low-severity subprocess advisories.
