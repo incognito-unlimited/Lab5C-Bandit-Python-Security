@@ -42,7 +42,9 @@ Lab5C-Bandit-Python-Security/
 │   ├── test_results.txt           # full functional-test output
 │   └── screenshots/               # 7 genuine screenshots
 ├── report/
-│   └── Lab5C_Report.md
+│   ├── Lab5C_Report.md
+│   ├── Lab_5C_Bandit_Python_Security_Aditey_Mehra.docx
+│   └── Lab_5C_Bandit_Python_Security_Aditey_Mehra.pdf
 ├── README.md
 └── .gitignore
 ```
